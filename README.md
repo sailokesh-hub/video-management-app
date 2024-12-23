@@ -1,70 +1,173 @@
-# Getting Started with Create React App
+# Video Management Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This repository contains a video management application with the following features:
+- User authentication (login/register).
+- Upload and view videos.
+- Backend built with Node.js and MongoDB.
+- Frontend built with React.
+- Containerized using Docker Compose.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Prerequisites
 
-### `npm start`
+Make sure you have the following installed on your system:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- [Node.js](https://nodejs.org/)
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [MongoDB Atlas](https://www.mongodb.com/atlas/database) account for cloud-based MongoDB.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## Project Structure
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+project-root/
+|-- backend/
+|   |-- src/
+|   |   |-- models/
+|   |   |-- routes/
+|   |   |-- index.js
+|   |-- .env
+|   |-- Dockerfile
+|-- client/
+|   |-- src/
+|   |-- Dockerfile
+|-- docker-compose.yml
+```
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Environment Variables
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Backend (`backend/.env`):
+```
+PORT=5001
+MONGO_URI=<your_mongodb_connection_string>
+JWT_SECRET=<your_secret_key>
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Make sure to replace `<your_mongodb_connection_string>` and `<your_secret_key>` with actual values.
 
-### `npm run eject`
+### Frontend: No environment variables required by default.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Setup and Run Instructions
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Step 1: Clone the Repository
+```bash
+git clone <repository_url>
+cd <repository_name>
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Step 2: Run the Application Using Docker Compose
+```bash
+docker-compose up --build
+```
+This command will:
+- Build and start the `frontend` on port `3000`.
+- Build and start the `backend` on port `5001`.
 
-## Learn More
+### Step 3: Access the Application
+- **Frontend**: `http://localhost:3000`
+- **Backend**: `http://localhost:5001`
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Docker Setup Details
 
-### Code Splitting
+### Docker Compose Configuration
+`docker-compose.yml` defines two services:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1. **frontend**
+   - Builds from `./client` directory.
+   - Exposes port `3000`.
+2. **backend**
+   - Builds from `./backend` directory.
+   - Exposes port `5001`.
 
-### Analyzing the Bundle Size
+### Backend Dockerfile
+```dockerfile
+FROM node:16
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+CMD ["node", "src/index.js"]
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Frontend Dockerfile
+```dockerfile
+FROM node:16
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+CMD ["npm", "start"]
+```
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Additional Docker Commands
 
-### Advanced Configuration
+### Stop and Remove All Containers
+```bash
+docker-compose down
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Rebuild Containers
+```bash
+docker-compose up --build
+```
 
-### Deployment
+### Clear Docker Cache
+```bash
+docker system prune -a
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## Backend API Endpoints
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Authentication
+- `POST /api/auth/login`: User login.
+- `POST /api/auth/register`: User registration.
+
+### Videos
+- `GET /api/video`: Get user videos.
+- `POST /api/video`: Upload a video.
+
+---
+
+## Frontend Features
+- User login and registration forms.
+- Video upload functionality.
+- Video gallery for logged-in users.
+
+---
+
+## Troubleshooting
+
+### Port Conflicts
+If ports `3000` or `5001` are in use, stop the processes using these ports:
+```bash
+# Replace <port> with the port number
+taskkill /F /PID $(lsof -ti:<port>)  # Mac/Linux
+netstat -ano | findstr :<port>      # Windows
+```
+
+### MongoDB Connection Issues
+Ensure your `MONGO_URI` in `backend/.env` is correct and your IP is whitelisted in MongoDB Atlas.
+
+---
+
+## Contributing
+
+Feel free to submit issues or pull requests for improvements and bug fixes.
+
+---
+
+## License
+This project is licensed under the MIT License.
